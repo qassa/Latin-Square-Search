@@ -15,7 +15,7 @@ public class LatinSquareSearch {
             return squares+1;
         }
         
-        if (curr_digit == 10){
+        if (curr_digit == m){
             int row = ((curr_position+1) /  m) -1;
             int col = (curr_position+1) - row * m;
             curr_grid[row][col] = 1;
@@ -25,8 +25,14 @@ public class LatinSquareSearch {
         }
         
         for(int i=curr_digit;i<=m;i++){
-            int row = (curr_position /  m) -1;
-            int col = curr_position - row * m;
+            int row = (int) Math.floor(curr_position /  m);
+            if ((int) curr_position % m ==0)
+                row  = row - 1;
+            
+            int col = (curr_position - row * m) -1;
+            
+            System.out.println("Digit "+curr_digit);
+            System.out.println("Square num "+curr_position);
             
 //            ArrayList<Integer> al = new ArrayList<Integer>();
 //            for (int g=1;g<=9;g++){
@@ -80,12 +86,12 @@ public class LatinSquareSearch {
         
         int squaresSum = 0;
         
-        for(int k=1;k<=9;k++){
+        for(int k=1;k<=m;k++){
             customSquare[0][0] = k;
-            squaresSum = squaresSum + innerSearch(0,2,k,customSquare);
+            squaresSum = squaresSum + innerSearch(0,2,1,customSquare);
         }
         
-        System.out.println("Найдено "+squaresSum+" возможных комбинаций литанских квадратов");
+        System.out.println("Найдено "+squaresSum+" возможных комбинаций латинских квадратов");
         
     }
     
