@@ -7,7 +7,7 @@ import java.util.List;
 public class LatinSquareSearch {
     public static int m; //размерность
     
-    public static int innerSearch(int squares, int position, List<elemParams> changable, List<elemParams> fixed, int[][] curr_square, int[][] custom_square){       
+    public static int innerSearch(int squares, int position, List<elemParams> changable, List<elemParams> fixed, int[][] curr_square){       
         for(int i=1;i<=m;i++){
 
             boolean cflag = false;
@@ -23,25 +23,12 @@ public class LatinSquareSearch {
                     curr_square[currElem.row][currElem.col] = 0;
                 }        
             }       
-            
+
             //проверка на дублирование числа в строке
-            for(int g=0;g<m;g++){
-                int grid_row = curr_square[row][g];
-                if(grid_row == i){
-                    cflag = true;
-                    break;
-                }
-            }
-            
+            if (checkRow(i,curr_square,row) == true) cflag = true;
+
             //проверка на дублирование числа в колонке
-            for(int g=0;g<m;g++){
-                int grid_row = curr_square[g][col];
-                if(grid_row == i){
-                    cflag = true;
-                    break;
-                }
-            }
-            
+            if (checkCol(i,curr_square,col) == true) cflag = true;  
             if (cflag == true) continue;
             curr_square[row][col] = i;
             
@@ -65,13 +52,9 @@ public class LatinSquareSearch {
             
             squares = squares +1;
             return squares;
-            }
-            
-            squares = innerSearch(squares, position+1, changable, fixed, curr_square, custom_square);
-            
-
-        }
-        
+            }   
+            squares = innerSearch(squares, position+1, changable, fixed, curr_square);
+        }    
         return squares;
     }
     
@@ -94,6 +77,28 @@ public class LatinSquareSearch {
     public static int getPosition(int row, int col){
         int position = row * m + (col + 1);
         return position;
+    }
+    
+    //проверить колонку на дублирование числа
+    public static boolean checkCol(int i, int[][] customSquare, int colStart){
+        for(int g=0;g<m;g++){
+            int grid_row = customSquare[g][colStart];
+                if(grid_row == i){
+                    return true;
+                }
+        }
+        return false;
+    }
+    
+    //проверить строку на дублирование числа
+    public static boolean checkRow(int i, int[][] customSquare, int rowStart){
+        for(int g=0;g<m;g++){
+        int grid_row = customSquare[rowStart][g];
+            if(grid_row == i){
+                return true;
+            }
+        }
+        return false;
     }
     
     public static int[][] initializeArray(int[][] customSquare){
@@ -162,41 +167,23 @@ public class LatinSquareSearch {
         for (int i=0; i< squareSize; i++){
             for (int j=0; j< squareSize; j++){
                 if (customSquare[i][j] == 0 && (i != rowStart || j != colStart)){
-                    changable.add(new elemParams(customSquare[i][j], i, j));
-                    System.out.println("Найдено "+i+" "+j);          
+                    changable.add(new elemParams(customSquare[i][j], i, j));        
                 }
             }
-        } 
-        System.out.println("Строка начальная"+rowStart);
-                System.out.println("Колонка начальная"+colStart);
-                  System.out.println(changable);      
+        }     
           
         //доступные для перебора числа в общем цикле
         List<Integer> kk = new ArrayList();
         
         for (int i = 1; i<=m; i++){
             boolean cflag = false;
-            for(int g=0;g<m;g++){
-                int grid_row = customSquare[rowStart][g];
-                    if(grid_row == i){
-                        System.out.println("В строке уже присутствует это число");
-                        cflag = true;
-                        break;
-                    }
-                }
             
-            for(int g=0;g<m;g++){
-                int grid_row = customSquare[g][colStart];
-                    if(grid_row == i){
-                        System.out.println("В колонке уже присутствует это число");
-                        cflag = true;
-                        break;
-                    }
-            }
+            if (checkRow(i,customSquare,rowStart) == true) cflag = true;
+            if (checkCol(i,customSquare,colStart) == true) cflag = true;
+            
             if (cflag == false)
                 kk.add(i);
         }
-                  System.out.println(kk);
                   
         if (kk.size() == 1 && changable.isEmpty()){
             customSquare[rowStart][colStart] = kk.get(0);
@@ -225,7 +212,7 @@ public class LatinSquareSearch {
                    }
                } 
 
-                squaresSum += innerSearch(0,0,changable,fixed,currSquare,customSquare);
+                squaresSum += innerSearch(0,0,changable,fixed,currSquare);
             }
         }
         
