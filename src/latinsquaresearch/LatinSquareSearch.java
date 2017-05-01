@@ -2,20 +2,22 @@ package latinsquaresearch;
 
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class LatinSquareSearch {
     public static int m; //размерность
     
     public static int innerSearch(int squares, int position, List<elemParams> changable, List<elemParams> fixed, int[][] curr_square){       
+        elemParams currElem = changable.get(position);
+        int row = currElem.row;
+        int col = currElem.col;
+            
         for(int i=1;i<=m;i++){
 
             boolean cflag = false;
-            
-            elemParams currElem = changable.get(position);
-            int row = currElem.row;
-            int col = currElem.col;
-            
+                       
             //очистка последующей матрицы для прогона всех возможных вариантов
             if (curr_square[row][col] != i && curr_square[row][col] != 0){
                 for (int clrPos = position; clrPos < changable.size(); clrPos++){
@@ -73,12 +75,6 @@ public class LatinSquareSearch {
         return col;
     }
     
-    //получить позицию при известных строке и колонке
-    public static int getPosition(int row, int col){
-        int position = row * m + (col + 1);
-        return position;
-    }
-    
     //проверить колонку на дублирование числа
     public static boolean checkCol(int i, int[][] customSquare, int colStart){
         for(int g=0;g<m;g++){
@@ -101,6 +97,16 @@ public class LatinSquareSearch {
         return false;
     }
     
+    //проверка введенного частичного квадрата на дублирование в строках и столбцах
+    public static boolean duplicates(int[] separateRow){
+        Set<Integer> lump = new HashSet<>();
+        for (int i : separateRow){
+            if (i!=0 && lump.contains(i)) return true;
+            lump.add(i);
+        }
+        return false;
+    }
+    
     public static int[][] initializeArray(int[][] customSquare){
         int [][] currSquare = new int[m][m];
         for (int i=0; i< m; i++){
@@ -113,12 +119,10 @@ public class LatinSquareSearch {
     
     //описание для хранения элемента квадрата отдельно от матрицы
     public static class elemParams{
-        public int value;
         public int row;
         public int col;
         
         public elemParams(int value, int row, int col){
-            this.value = value;
             this.row = row;
             this.col = col;
         }
@@ -144,11 +148,31 @@ public class LatinSquareSearch {
         
         int squaresSum = 0;
         
+        //проверка частичного квадрата на корректность (отсутствие дубликатов чисел)
+        boolean incorrect = false;
+        int [] rowInts = new int[m];
+        for (int i=0; i< m; i++){
+            for (int j=0; j< m; j++){
+                rowInts[j] = customSquare[i][j];
+            }
+            if (duplicates(rowInts)) incorrect = true;
+        }
+        
+        for (int i=0; i< m; i++){
+            for (int j=0; j< m; j++){
+                rowInts[j] = customSquare[j][i];
+            }
+            if (duplicates(rowInts)) incorrect = true; 
+        }
+        if (incorrect){
+            System.out.println("Некорректный частичный квадрат - дубликаты в колонке или столбце");   
+            return;
+        }
+        
         //поиск первого элемента, которому присвоено значение 0 /т.е. не присвоено значение
         boolean ex = false;
         int rowStart = 0;
         int colStart = 0;
-        int posStart = 0;
         for (int i=0; i< squareSize; i++){
             for (int j=0; j< squareSize; j++){
                 if(customSquare[i][j] == 0){
@@ -160,7 +184,6 @@ public class LatinSquareSearch {
             }
             if (ex == true) break;
         }
-        posStart = getPosition(rowStart, colStart);
         
         //заполнение изменяемой части массива
         List<elemParams> changable = new ArrayList();
@@ -210,14 +233,10 @@ public class LatinSquareSearch {
                             fixed.add(new elemParams(customSquare[i][j], i, j));
                         }
                    }
-               } 
-
-                squaresSum += innerSearch(0,0,changable,fixed,currSquare);
+               }
+               squaresSum += innerSearch(0,0,changable,fixed,currSquare);
             }
         }
-        
-        System.out.println("Найдено "+squaresSum+" возможных комбинаций латинских квадратов");
-        
-    }
-    
+        System.out.println("Найдено "+squaresSum+" возможных комбинаций латинских квадратов");  
+    } 
 }
